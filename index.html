@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Nearby Parking Finder (Free Version)</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
+    .info-box {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+      z-index: 1000;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body>
+  <div class="info-box">Finding nearby parking spots...</div>
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    navigator.geolocation.getCurrentPosition((position) => {
+      const userLat = position.coords.latitude;
+      const userLng = position.coords.longitude;
+
+      const map = L.map('map').setView([userLat, userLng], 15);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+
+      L.marker([userLat, userLng])
+        .addTo(map)
+        .bindPopup('You are here')
+        .openPopup();
+
+      const parkingSpots = [
+        { lat: userLat + 0.001, lng: userLng + 0.001, name: "City Parking 1", available: true },
+        { lat: userLat - 0.001, lng: userLng - 0.001, name: "City Parking 2", available: false },
+        { lat: userLat + 0.0015, lng: userLng - 0.0015, name: "Metro Parking Lot", available: true },
+      ];
+
+      parkingSpots.forEach(spot => {
+        const icon = L.divIcon({
+          className: 'custom-icon',
+          html: spot.available ? '🅿️' : '❌',
+          iconSize: [24, 24],
+          iconAnchor: [12, 12]
+        });
+
+        L.marker([spot.lat, spot.lng], { icon: icon })
+          .addTo(map)
+          .bindPopup(`<b>${spot.name}</b><br>${spot.available ? "Available" : "Full"}`);
+      });
+
+    }, () => {
+      alert("Unable to retrieve your location.");
+    });
+  </script>
+</body>
+</html>
